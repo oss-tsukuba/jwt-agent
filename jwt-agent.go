@@ -81,7 +81,7 @@ func init() {
   }
 }
 
-func getToken(userId string, passphrase string) (string, error) {
+func getToken(userId string, passphrase string, initial bool) (string, error) {
   endpoint := fmt.Sprintf("https://%s/jwt-server/jwt", *server)
 
   values := url.Values{}
@@ -101,9 +101,26 @@ func getToken(userId string, passphrase string) (string, error) {
 
   client := &http.Client{}
   resp, err := client.Do(req)
-  if err != nil {
-    return "", err
+
+  if initial && err != nil {
+    return "", err    
+  } else if err != nil {
+    sec := 1
+
+    for err != nil {
+      log.Printf("retry after %d seconds\n", sec)
+      time.Sleep(time.Duration(sec) * time.Second)
+    
+      resp, err = client.Do(req)
+
+      if sec >= 64 {
+        sec = 64
+      } else {
+        sec *= 2
+      }
+    }    
   }
+  
   defer resp.Body.Close()
 
   if resp.StatusCode != 200 {
@@ -182,8 +199,10 @@ func main() {
   }
   fmt.Println()
 
+  initial := true
+  
   for {
-    token, err := getToken(*userId, string(passphrase))
+    token, err := getToken(*userId, string(passphrase), initial)
     if err != nil {
       log.Fatalln(err)
       panic(err)
@@ -195,6 +214,7 @@ func main() {
       panic(err)
     }
 
+    initial = false
     time.Sleep(time.Duration(limit) * time.Second)  
   }
 }
