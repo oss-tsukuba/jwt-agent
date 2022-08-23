@@ -23,20 +23,15 @@ import (
 
 var (
   server     = flag.String("s", "", "JWT Server")
-  lock       = flag.String("lock", "/tmp/jwt-agent.pid", "Process ID")
+  lock       = flag.String("lock", "jwt-agent.pid", "Process ID")
   userId     = flag.String("l", "", "User Name")
   uid        string
   passphrase string
+  dir        string
 )
 
 func init() {
   var oldPid string
-
-  logger, err := syslog.New(syslog.LOG_INFO, "jwt-agent")
-  if err != nil {
-    panic(err)
-  }
-  log.SetOutput(logger)
 
   cuser, err := user.Current()
   if err != nil {
@@ -46,8 +41,21 @@ func init() {
 
   uid = cuser.Uid
   
-	
-  fp, err := os.Open(*lock)
+  dir = "/tmp/jwt_user_u" + uid
+
+  if _, err := os.Stat(dir); os.IsNotExist(err) {
+    os.Mkdir(dir, 0755)
+  }
+
+  lockFile := dir + "/" + *lock;
+  
+  logger, err := syslog.New(syslog.LOG_INFO, "jwt-agent")
+  if err != nil {
+    panic(err)
+  }
+  log.SetOutput(logger)
+
+  fp, err := os.Open(lockFile)
   if err == nil {
     defer fp.Close()
     scanner := bufio.NewScanner(fp)
@@ -67,7 +75,7 @@ func init() {
 
   pid := os.Getpid()
 
-  file, err := os.Create(*lock)
+  file, err := os.Create(lockFile)
   if err != nil {
     log.Fatalln(err)  
     panic(err)
@@ -134,7 +142,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
     return "", fmt.Errorf("authentication error")
   }
 
-  filename := "/tmp/jwt_user_u" + uid
+  filename := dir + "/token.jwt"
   file, err := os.Create(filename)
   if err != nil {
       return "", err
