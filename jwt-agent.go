@@ -96,45 +96,53 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
   values.Set("user", userId)
   values.Add("pass", passphrase)
 
-  req, err := http.NewRequest(
-    "POST",
-    endpoint,
-    strings.NewReader(values.Encode()),
-  )
-  if err != nil {
-    return "", err
-  }
+  client := http.DefaultClient
+  var resp *http.Response
+  sec := 1
 
-  req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+  for {
+    req, err := http.NewRequest(
+      "POST",
+      endpoint,
+      strings.NewReader(values.Encode()),
+    )
+    if err != nil {
+      return "", err
+    }
 
-  client := &http.Client{}
-  resp, err := client.Do(req)
+    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-  if initial && err != nil {
-    return "", err    
-  } else if err != nil {
-    sec := 1
+    log.Printf("HTTP Request\n");
 
-    for err != nil {
-      log.Printf("retry after %d seconds\n", sec)
-      time.Sleep(time.Duration(sec) * time.Second)
-    
-      resp, err = client.Do(req)
+    resp, err = client.Do(req)
 
-      if sec >= 64 {
-        sec = 64
+    if err != nil {
+      log.Println(err)
+      defer resp.Body.Close()
+    } else {
+      log.Printf("status:%d\n", resp.StatusCode)
+    }
+
+    if (err != nil || resp.StatusCode != 200) {
+
+      if initial {
+        return "", fmt.Errorf("server error")
       } else {
-        sec *= 2
+        log.Printf("retry after %d seconds\n", sec)
+
+        time.Sleep(time.Duration(sec) * time.Second)
+
+        if sec >= 64 {
+          sec = 64
+        } else {
+          sec *= 2
+        }
+        continue
       }
-    }    
+    }
+    break
   }
   
-  defer resp.Body.Close()
-
-  if resp.StatusCode != 200 {
-    return "", fmt.Errorf("bad response status code %d", resp.StatusCode)
-  }
-
   body, _ := io.ReadAll(resp.Body)
   token := string(body)
 
