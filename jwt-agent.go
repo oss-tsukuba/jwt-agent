@@ -19,6 +19,8 @@ import (
   b64 "encoding/base64"
   
   "golang.org/x/crypto/ssh/terminal"
+
+  "github.com/mattn/go-isatty"
 )
 
 var (
@@ -207,18 +209,25 @@ func main() {
     return
   }
 
-  fmt.Print("passphrase:")
-  passphrase, err := terminal.ReadPassword(0)
-  if err != nil {
-    log.Fatalln(err)
-    panic(err)
+  var passphrase string
+
+if isatty.IsTerminal(os.Stdout.Fd()) {
+    fmt.Print("passphrase:")
+    phrase, err := terminal.ReadPassword(0)
+    if err != nil {
+      log.Fatalln(err)
+      panic(err)
+    }
+    fmt.Println()
+    passphrase = string(phrase)
+  } else {
+    fmt.Scan(&passphrase) 
   }
-  fmt.Println()
 
   initial := true
-  
+
   for {
-    token, err := getToken(*userId, string(passphrase), initial)
+    token, err := getToken(*userId, passphrase, initial)
     if err != nil {
       log.Fatalln(err)
       panic(err)

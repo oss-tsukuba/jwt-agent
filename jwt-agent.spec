@@ -20,6 +20,7 @@ Agent for JWT-SERVER
 %build
 go mod download golang.org/x/crypto
 go get golang.org/x/crypto/ssh/terminal@v0.0.0-20220722155217-630584e8d5aa
+go get github.com/mattn/go-isatty
 go build jwt-agent.go
 
 %install
