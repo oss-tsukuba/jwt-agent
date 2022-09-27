@@ -77,7 +77,7 @@ func init() {
 
   pid := os.Getpid()
 
-  file, err := os.Create(lockFile)
+  file, err := os.OpenFile(lockFile, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0600)
   if err != nil {
     log.Fatalln(err)  
     panic(err)
@@ -153,7 +153,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
   }
 
   filename := dir + "/token.jwt"
-  file, err := os.Create(filename)
+  file, err := os.OpenFile(filename, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0600)
   if err != nil {
       return "", err
   }
