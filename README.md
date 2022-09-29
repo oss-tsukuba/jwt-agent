@@ -8,7 +8,7 @@
 
     % go install
 
-    [Install Directory](https://pkg.go.dev/cmd/go#hdr-Compile_and_install_packages_and_dependencies)
+[Install Directory](https://pkg.go.dev/cmd/go#hdr-Compile_and_install_packages_and_dependencies)
     
 ## Usage
 
