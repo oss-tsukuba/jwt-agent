@@ -18,14 +18,11 @@ Agent for JWT-SERVER
 %setup -q
 
 %build
-go mod download golang.org/x/crypto
-go get golang.org/x/crypto/ssh/terminal@v0.0.0-20220722155217-630584e8d5aa
-go get github.com/mattn/go-isatty
-go build jwt-agent.go
+make
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -Dpm 0755 %{name} %{buildroot}%{_bindir}/%{name}
+make DESTDIR=${RPM_BUILD_ROOT} BINDIR=%{_bindir} install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
