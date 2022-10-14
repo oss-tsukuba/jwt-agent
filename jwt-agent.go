@@ -120,9 +120,9 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
 
     if err != nil {
       log.Println(err)
-      defer resp.Body.Close()
     } else {
       log.Printf("status:%d\n", resp.StatusCode)
+      defer resp.Body.Close()
     }
 
     if (err != nil || resp.StatusCode != 200) {
