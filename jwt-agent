@@ -1,0 +1,52 @@
+#!/bin/sh
+
+CURL=curl
+PORT=443
+
+CMDNAME=$(basename $0)
+
+CURRENT=$(cd $(dirname $0);pwd)
+
+if [ -z $JWT_USER ]; then
+  USER_ID=`id -u`
+  DOWNLOAD_FOLDER=/tmp/jwt_user_u$USER_ID
+  mkdir -p $DOWNLOAD_FOLDER
+  DOWNLOAD_PATH="${DOWNLOAD_FOLDER}/token.jwt"
+else
+  DOWNLOAD_PATH=$JWT_USER
+fi
+
+while getopts s:l:p:f OPT
+do
+  case $OPT in
+    "s" ) HOST="$OPTARG" ;;
+    "l" ) ACCOUNT="$OPTARG" ;;
+    "p" ) PORT="$OPTARG" ;;
+    "f" ) FOREGROUND=true ;;    
+      * ) echo "Usage: $CMDNAME [-s HOST] [-l USER] [-f]" 1>&2
+          exit 1 ;;
+  esac
+done
+
+if [ -z "$HOST" -o -z "$ACCOUNT" ]; then
+ echo "Usage: $CMDNAME [-s HOST] [-l USER] [-f]" 1>&2
+ exit 1
+fi
+
+if [ -t 0 ]; then
+  echo -n "Passphrase: "
+  trap "stty echo" HUP INT QUIT TERM
+  stty -echo
+  read PASS
+  stty echo
+
+  echo
+else
+  read PASS
+fi
+
+if [ -z "$FOREGROUND" ]; then
+    $CURRENT/jwt-agent-core -s $HOST -l $ACCOUNT -pass $PASS &
+else
+    $CURRENT/jwt-agent-core -s $HOST -l $ACCOUNT -pass $PASS
+fi

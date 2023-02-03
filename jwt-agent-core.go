@@ -18,17 +18,14 @@ import (
 
   b64 "encoding/base64"
   
-  "golang.org/x/crypto/ssh/terminal"
-
-  "github.com/mattn/go-isatty"
 )
 
 var (
   server     = flag.String("s", "", "JWT Server")
   lock       = flag.String("lock", "jwt-agent.pid", "Process ID")
   userId     = flag.String("l", "", "User Name")
+  passphrase = flag.String("pass", "", "Passphrase")
   uid        string
-  passphrase string
   dir        string
 )
 
@@ -205,30 +202,15 @@ func parseToken(tokenString string) (int64, error) {
 func main() {
   flag.Parse()
 
-  if (*server == "" || *userId == "") {
-    fmt.Println("Usage: jwt-agent -s {server} -l {user}")
+  if (*server == "" || *userId == "" || *passphrase == "") {
+    fmt.Println("Usage: jwt-agent-core -s {server} -l {user} -pass {passphrase}")
     return
-  }
-
-  var passphrase string
-
-if isatty.IsTerminal(os.Stdout.Fd()) {
-    fmt.Print("passphrase:")
-    phrase, err := terminal.ReadPassword(0)
-    if err != nil {
-      log.Fatalln(err)
-      panic(err)
-    }
-    fmt.Println()
-    passphrase = string(phrase)
-  } else {
-    fmt.Scan(&passphrase) 
   }
 
   initial := true
 
   for {
-    token, err := getToken(*userId, passphrase, initial)
+    token, err := getToken(*userId, *passphrase, initial)
     if err != nil {
       log.Fatalln(err)
       panic(err)

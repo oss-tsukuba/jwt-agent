@@ -29,6 +29,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %{_bindir}/%{name}
+%{_bindir}/jwt-agent-core
 
 
 %changelog
