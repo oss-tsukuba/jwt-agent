@@ -16,7 +16,7 @@ $(PROGRAM): $(PROGRAM).go
 install:
 	@$(MKDIR_P) $(DESTDIR)$(BINDIR)
 	$(INSTALL_PROGRAM) $(PROGRAM) $(DESTDIR)$(BINDIR)/$(PROGRAM)
-	$(INSTALL_PROGRAM) jwt-agent $(DESTDIR)$(BINDIR)/$(PROGRAM)
+	$(INSTALL_PROGRAM) jwt-agent $(DESTDIR)$(BINDIR)/jwt-agent
 
 clean:
 	$(RM) -f $(PROGRAM) go.sum
