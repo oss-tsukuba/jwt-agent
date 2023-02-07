@@ -22,8 +22,8 @@ do
     "s" ) HOST="$OPTARG" ;;
     "l" ) ACCOUNT="$OPTARG" ;;
     "p" ) PORT="$OPTARG" ;;
-    "f" ) FOREGROUND=true ;;    
-      * ) echo "Usage: $CMDNAME [-s HOST] [-l USER] [-f]" 1>&2
+    "f" ) FOREGROUND=true ;;
+    * ) echo "Usage: $CMDNAME [-s HOST] [-l USER] [-f]" 1>&2
           exit 1 ;;
   esac
 done
@@ -46,7 +46,7 @@ else
 fi
 
 if [ -z "$FOREGROUND" ]; then
-    $CURRENT/jwt-agent-core -s $HOST -l $ACCOUNT -pass $PASS &
+    echo "$PASS" | $CURRENT/jwt-agent-core -s $HOST -l $ACCOUNT &
 else
-    $CURRENT/jwt-agent-core -s $HOST -l $ACCOUNT -pass $PASS
+    echo "$PASS" | $CURRENT/jwt-agent-core -s $HOST -l $ACCOUNT
 fi

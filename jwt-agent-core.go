@@ -24,7 +24,6 @@ var (
   server     = flag.String("s", "", "JWT Server")
   lock       = flag.String("lock", "jwt-agent.pid", "Process ID")
   userId     = flag.String("l", "", "User Name")
-  passphrase = flag.String("pass", "", "Passphrase")
   uid        string
   dir        string
 )
@@ -202,22 +201,28 @@ func parseToken(tokenString string) (int64, error) {
 func main() {
   flag.Parse()
 
-  if (*server == "" || *userId == "" || *passphrase == "") {
-    fmt.Println("Usage: jwt-agent-core -s {server} -l {user} -pass {passphrase}")
+  if (*server == "" || *userId == "") {
+    fmt.Println("Usage: jwt-agent-core -s {server} -l {user}")
     return
   }
+
+  var passphrase string
+  fmt.Scan(&passphrase)
 
   initial := true
 
   for {
-    token, err := getToken(*userId, *passphrase, initial)
+    token, err := getToken(*userId, passphrase, initial)
     if err != nil {
-      log.Fatalln(err)
+      fmt.Fprintln(os.Stderr, "Authentication Error")
+      log.Fatalln(*userId + ": Authentication Error")
       panic(err)
     }
 
     limit, err := parseToken(token)
     if err != nil {
+      fmt.Fprintln(os.Stderr, "Invalid Token")
+      log.Fatal(*userId + ": Invalid Token")
       log.Fatalln(err)
       panic(err)
     }
