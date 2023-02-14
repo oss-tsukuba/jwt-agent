@@ -19,17 +19,17 @@ fi
 while getopts s:l:p:f OPT
 do
   case $OPT in
-    "s" ) HOST="$OPTARG" ;;
+    "s" ) URL="$OPTARG" ;;
     "l" ) ACCOUNT="$OPTARG" ;;
     "p" ) PORT="$OPTARG" ;;
     "f" ) FOREGROUND=true ;;
-    * ) echo "Usage: $CMDNAME [-s HOST] [-l USER] [-f]" 1>&2
+    * ) echo "Usage: $CMDNAME [-s URL] [-l USER] [-f]" 1>&2
           exit 1 ;;
   esac
 done
 
-if [ -z "$HOST" -o -z "$ACCOUNT" ]; then
- echo "Usage: $CMDNAME [-s HOST] [-l USER] [-f]" 1>&2
+if [ -z "$URL" -o -z "$ACCOUNT" ]; then
+ echo "Usage: $CMDNAME [-s URL] [-l USER] [-f]" 1>&2
  exit 1
 fi
 
@@ -46,7 +46,7 @@ else
 fi
 
 if [ -z "$FOREGROUND" ]; then
-    echo "$PASS" | $CURRENT/jwt-agent-core -s $HOST -l $ACCOUNT &
+    echo "$PASS" | $CURRENT/jwt-agent-core -s $URL -l $ACCOUNT &
 else
-    echo "$PASS" | $CURRENT/jwt-agent-core -s $HOST -l $ACCOUNT
+    echo "$PASS" | $CURRENT/jwt-agent-core -s $URL -l $ACCOUNT
 fi

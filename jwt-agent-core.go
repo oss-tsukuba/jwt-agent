@@ -21,7 +21,7 @@ import (
 )
 
 var (
-  server     = flag.String("s", "", "JWT Server")
+  server     = flag.String("s", "", "JWT Server URL")
   lock       = flag.String("lock", "jwt-agent.pid", "Process ID")
   userId     = flag.String("l", "", "User Name")
   uid        string
@@ -88,7 +88,7 @@ func init() {
 }
 
 func getToken(userId string, passphrase string, initial bool) (string, error) {
-  endpoint := fmt.Sprintf("https://%s/jwt-server/jwt", *server)
+  endpoint := fmt.Sprintf("%s/jwt", *server)
 
   values := url.Values{}
   values.Set("user", userId)
@@ -202,7 +202,7 @@ func main() {
   flag.Parse()
 
   if (*server == "" || *userId == "") {
-    fmt.Println("Usage: jwt-agent-core -s {server} -l {user}")
+    fmt.Println("Usage: jwt-agent-core -s {URL} -l {USER}")
     return
   }
 
