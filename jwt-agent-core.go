@@ -146,7 +146,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
   token := string(body)
 
   if token == "" {
-    return "", fmt.Errorf("authentication error")
+    return "", fmt.Errorf("Authentication error")
   }
 
   filename := dir + "/token.jwt"
@@ -214,8 +214,8 @@ func main() {
   for {
     token, err := getToken(*userId, passphrase, initial)
     if err != nil {
-      fmt.Fprintln(os.Stderr, "Authentication Error")
-      log.Fatalln(*userId + ": Authentication Error")
+      fmt.Fprintln(os.Stderr, err)
+      log.Fatalln(*userId + ": " + err.Error())      
       panic(err)
     }
 
