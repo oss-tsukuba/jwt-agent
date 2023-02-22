@@ -7,13 +7,21 @@ CMDNAME=$(basename $0)
 
 CURRENT=$(cd $(dirname $0);pwd)
 
-if [ -z $JWT_USER ]; then
+if [ -z $JWT_USER_PATH ]; then
   USER_ID=`id -u`
   DOWNLOAD_FOLDER=/tmp/jwt_user_u$USER_ID
-  mkdir -p $DOWNLOAD_FOLDER
   DOWNLOAD_PATH="${DOWNLOAD_FOLDER}/token.jwt"
 else
-  DOWNLOAD_PATH=$JWT_USER
+  DOWNLOAD_PATH=$JWT_USER_PATH
+fi
+umask 077; mkdir -p `dirname $DOWNLOAD_PATH`
+
+if [ -n $JWT_SERVER_URL ]; then
+  URL=$JWT_SERVER_URL
+fi
+
+if [ -n $LOGNAME ]; then
+  ACCOUNT=$LOGNAME
 fi
 
 while getopts s:l:p:f OPT

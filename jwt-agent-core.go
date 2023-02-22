@@ -15,6 +15,7 @@ import (
   "time"
   "encoding/json"
   "os/user"
+  "path/filepath"
 
   b64 "encoding/base64"
   
@@ -26,6 +27,7 @@ var (
   userId     = flag.String("l", "", "User Name")
   uid        string
   dir        string
+  basename   = "token.jwt"
 )
 
 func init() {
@@ -38,8 +40,15 @@ func init() {
   }
 
   uid = cuser.Uid
-  
-  dir = "/tmp/jwt_user_u" + uid
+
+  path := os.Getenv("JWT_USER_PATH")
+
+  if (path != "") {
+    basename = filepath.Base(path)
+    dir = filepath.Dir(path)
+  } else {
+    dir = "/tmp/jwt_user_u" + uid
+  }
 
   if _, err := os.Stat(dir); os.IsNotExist(err) {
     os.Mkdir(dir, 0755)
@@ -149,8 +158,9 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
     return "", fmt.Errorf("Authentication error")
   }
 
-  filename := dir + "/token.jwt"
-  file, err := os.OpenFile(filename, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0600)
+  tmpname := "token.tmp"
+  filepath := dir + "/" + tmpname
+  file, err := os.OpenFile(filepath, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0600)
   if err != nil {
       return "", err
   }
@@ -161,7 +171,12 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
   }
 
   log.Println("get token...")
-  
+
+  err = os.Rename(dir + "/" + tmpname, dir + "/" + basename)
+  if err != nil {
+      return "", err
+  }
+
   return token, nil
 }
 
@@ -214,7 +229,7 @@ func main() {
   for {
     token, err := getToken(*userId, passphrase, initial)
     if err != nil {
-      fmt.Fprintln(os.Stderr, err)
+      fmt.Fprintln(os.Stderr, *userId + ": " + err.Error())
       log.Fatalln(*userId + ": " + err.Error())      
       panic(err)
     }
