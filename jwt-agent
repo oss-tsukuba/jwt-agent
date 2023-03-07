@@ -2,59 +2,130 @@
 
 CURL=curl
 PORT=443
+FOREGROUND=false
+MODE=start
+STOP_TIMEOUT=60
 
-CMDNAME=$(basename $0)
+CMDNAME=$(basename "$0")
+CURRENT=$(dirname "$0")
 
-CURRENT=$(cd $(dirname $0);pwd)
+usage()
+{
+  echo >&2 "Usage: $CMDNAME [-s URL] [-l USER] [-f]"
+  echo >&2 "       $CMDNAME --status"
+  echo >&2 "       $CMDNAME --stop [-t TIMEOUT]"
+  exit 2
+}
 
-if [ -z $JWT_USER_PATH ]; then
+if [ -z "$JWT_USER_PATH" ]; then
   USER_ID=`id -u`
-  DOWNLOAD_FOLDER=/tmp/jwt_user_u$USER_ID
-  DOWNLOAD_PATH="${DOWNLOAD_FOLDER}/token.jwt"
+  DOWNLOAD_DIR="/tmp/jwt_user_u$USER_ID"
+  DOWNLOAD_PATH="${DOWNLOAD_DIR}/token.jwt"
 else
-  DOWNLOAD_PATH=$JWT_USER_PATH
+  DOWNLOAD_PATH="$JWT_USER_PATH"
+  DOWNLOAD_DIR=$(dirname "$DOWNLOAD_PATH")
 fi
-umask 077; mkdir -p `dirname $DOWNLOAD_PATH`
+PIDFILE="$DOWNLOAD_DIR/jwt-agent.pid"
 
-if [ -n $JWT_SERVER_URL ]; then
+umask 077
+mkdir -p "$DOWNLOAD_DIR"
+
+if [ -n "$JWT_SERVER_URL" ]; then
   URL=$JWT_SERVER_URL
 fi
 
-if [ -n $LOGNAME ]; then
+if [ -n "$LOGNAME" ]; then
   ACCOUNT=$LOGNAME
 fi
 
-while getopts s:l:p:f OPT
+while getopts ":s:l:p:ft:-:" OPT
 do
-  case $OPT in
-    "s" ) URL="$OPTARG" ;;
-    "l" ) ACCOUNT="$OPTARG" ;;
-    "p" ) PORT="$OPTARG" ;;
-    "f" ) FOREGROUND=true ;;
-    * ) echo "Usage: $CMDNAME [-s URL] [-l USER] [-f]" 1>&2
-          exit 1 ;;
+  if [ "$OPT" = "-" ]; then OPT="-$OPTARG"; fi
+  case "-$OPT" in
+  -s) URL="$OPTARG" ;;
+  -l) ACCOUNT="$OPTARG" ;;
+  -p) PORT="$OPTARG" ;;
+  -f) FOREGROUND=true ;;
+  -t) STOP_TIMEOUT="$OPTARG" ;;
+  --status) MODE=status ;;
+  --stop) MODE=stop ;;
+  '-?')
+    echo >&2 "${CMDNAME}: unknown option -$OPTARG"
+    usage;;
+  *)
+    echo >&2 "${CMDNAME}: unknown option -$OPT"
+    usage;;
   esac
 done
+shift $((OPTIND - 1))
+case $# in
+0) :;;
+*)
+  echo >&2 "${CMDNAME}: unused arguments: $*"
+  usage;;
+esac
 
-if [ -z "$URL" -o -z "$ACCOUNT" ]; then
- echo "Usage: $CMDNAME [-s URL] [-l USER] [-f]" 1>&2
- exit 1
-fi
+case $MODE in
+start)
 
-if [ -t 0 ]; then
-  echo -n "Passphrase: "
-  trap "stty echo" HUP INT QUIT TERM
-  stty -echo
-  read PASS
-  stty echo
+  if [ -z "$URL" -o -z "$ACCOUNT" ]; then
+    usage
+  fi
 
-  echo
-else
-  read PASS
-fi
+  if [ -t 0 ]; then
+    echo -n "Passphrase: "
+    trap "stty echo" HUP INT QUIT TERM
+    stty -echo
+    read PASS
+    stty echo
 
-if [ -z "$FOREGROUND" ]; then
-    echo "$PASS" | $CURRENT/jwt-agent-core -s $URL -l $ACCOUNT &
-else
-    echo "$PASS" | $CURRENT/jwt-agent-core -s $URL -l $ACCOUNT
-fi
+    echo
+  else
+    read PASS
+  fi
+
+  if $FOREGROUND; then
+    echo "$PASS" | $CURRENT/jwt-agent-core -s "$URL" -l "$ACCOUNT"
+  else
+    echo "$PASS" | $CURRENT/jwt-agent-core -s "$URL" -l "$ACCOUNT" &
+  fi
+  ;;
+
+stop)
+  if [ -f "$PIDFILE" ]; then
+    pid=$(cat "$PIDFILE")
+    if kill -TERM $pid; then
+      i=0
+      while kill -0 $pid 2>/dev/null; do
+        i=$((i + 1))
+        if [ $i -gt "$STOP_TIMEOUT" ]; then
+          echo "cannot stop $CMDNAME (pid $pid), aborted"
+          exit 2
+        fi
+        echo "old $CMDNAME (pid $pid) is still running, sleeping..."
+        sleep 1
+      done
+      rm -f "$PIDFILE"
+      echo "$CMDNAME (pid $pid) stopped"
+    else
+      echo "$CMDNAME (pid $pid) is not running? (check $PIDFILE)"
+      exit 1
+    fi
+  else
+    echo "$CMDNAME is already stopped (no $PIDFILE)"
+    exit 1
+  fi
+  ;;
+
+status)
+  if [ -f "$PIDFILE" ] && kill -0 $(cat "$PIDFILE"); then
+    echo "$CMDNAME (pid $(cat "$PIDFILE")) is running"
+  elif [ -f "$PIDFILE" ]; then
+    echo "$CMDNAME (pid $(cat "$PIDFILE")) is not running? (check $PIDFILE)"
+    exit 1
+  else
+    echo "$CMDNAME is stopped (no $PIDFILE)"
+    exit 1
+  fi
+  ;;
+esac
