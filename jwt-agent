@@ -4,17 +4,29 @@ CURL=curl
 PORT=443
 FOREGROUND=false
 MODE=start
-STOP_TIMEOUT=60
+TIMEOUT=60
 
 CMDNAME=$(basename "$0")
 CURRENT=$(dirname "$0")
 
 usage()
 {
-  echo >&2 "Usage: $CMDNAME [-s URL] [-l USER] [-f]"
+  echo >&2 "Usage: $CMDNAME [-s URL] [-l USER] [-f] [-t TIMEOUT]"
   echo >&2 "       $CMDNAME --status"
   echo >&2 "       $CMDNAME --stop [-t TIMEOUT]"
   exit 2
+}
+
+is_jwt_agent_ready() {
+  old_jwt=$1
+
+  if [ ! -f "$DOWNLOAD_PATH" -o ! -f "$PIDFILE" ]; then
+    return 1
+  fi
+  case "$old_jwt" in
+  '') return 0;;
+  *) [ "$DOWNLOAD_PATH" -nt "$old_jwt" ];;
+  esac
 }
 
 if [ -z "$JWT_USER_PATH" ]; then
@@ -46,7 +58,7 @@ do
   -l) ACCOUNT="$OPTARG" ;;
   -p) PORT="$OPTARG" ;;
   -f) FOREGROUND=true ;;
-  -t) STOP_TIMEOUT="$OPTARG" ;;
+  -t) TIMEOUT="$OPTARG" ;;
   --status) MODE=status ;;
   --stop) MODE=stop ;;
   '-?')
@@ -87,7 +99,50 @@ start)
   if $FOREGROUND; then
     echo "$PASS" | $CURRENT/jwt-agent-core -s "$URL" -l "$ACCOUNT"
   else
+
+    # create a marker file ($OLD_JWT) to see whether jwt-agent started or not
+    if [ -f "$DOWNLOAD_PATH" ]; then
+      OLD_JWT="${DOWNLOAD_PATH}.bak"
+      TMP_JWT="${DOWNLOAD_PATH}.tmp"
+      cp -p "$DOWNLOAD_PATH" "$OLD_JWT"
+      cp    "$DOWNLOAD_PATH" "$TMP_JWT"
+      if [ ! "$TMP_JWT" -nt "$OLD_JWT" ]; then
+        # time resolution of the filesystem is too coarse
+        need_sleep=true
+      else
+        need_sleep=false
+      fi
+      rm -f "$TMP_JWT"
+    else
+      OLD_JWT=
+      need_sleep=false
+    fi
+
     echo "$PASS" | $CURRENT/jwt-agent-core -s "$URL" -l "$ACCOUNT" &
+    pid=$!
+
+    if $need_sleep && kill -0 $pid 2>/dev/null; then
+      sleep 1
+    else
+      # to avoid "sleep 1" in the while loop below,
+      # when jwt-agent-core aborted immediately
+      sleep 0.1
+    fi
+
+    # wait until JWT and PIDFILE are created
+    i=0
+    while ! is_jwt_agent_ready "$OLD_JWT"; do
+      i=$((i + 1))
+      if [ $i -gt "$TIMEOUT" ]; then
+	echo >&2 "$CMDNAME (pid $pid): too long time to acquire JWT, timed out"
+	exit 2
+      fi
+      if ! kill -0 $pid 2>/dev/null; then
+	echo >&2 "$CMDNAME (pid $pid) aborted"
+	exit 1
+      fi
+      sleep 1
+    done
   fi
   ;;
 
@@ -98,7 +153,7 @@ stop)
       i=0
       while kill -0 $pid 2>/dev/null; do
         i=$((i + 1))
-        if [ $i -gt "$STOP_TIMEOUT" ]; then
+        if [ $i -gt "$TIMEOUT" ]; then
           echo "cannot stop $CMDNAME (pid $pid), aborted"
           exit 2
         fi
