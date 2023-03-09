@@ -149,7 +149,7 @@ start)
 stop)
   if [ -f "$PIDFILE" ]; then
     pid=$(cat "$PIDFILE")
-    if kill -TERM $pid; then
+    if kill -TERM $pid 2>/dev/null; then
       i=0
       while kill -0 $pid 2>/dev/null; do
         i=$((i + 1))
