@@ -155,7 +155,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
   token := string(body)
 
   if token == "" {
-    return "", fmt.Errorf("Authentication error")
+    return "", fmt.Errorf("jwt-agent, Authentication error (exited)")
   }
 
   tmpname := "token.tmp"
