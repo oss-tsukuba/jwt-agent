@@ -173,7 +173,7 @@ stop)
   ;;
 
 status)
-  if [ -f "$PIDFILE" ] && kill -0 $(cat "$PIDFILE"); then
+  if [ -f "$PIDFILE" ] && kill -0 $(cat "$PIDFILE") 2>/dev/null; then
     echo "$CMDNAME (pid $(cat "$PIDFILE")) is running"
   elif [ -f "$PIDFILE" ]; then
     echo "$CMDNAME (pid $(cat "$PIDFILE")) is not running? (check $PIDFILE)"
