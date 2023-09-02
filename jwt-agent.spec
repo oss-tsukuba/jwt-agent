@@ -22,7 +22,7 @@ make
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make DESTDIR=${RPM_BUILD_ROOT} BINDIR=%{_bindir} install
+make DESTDIR=${RPM_BUILD_ROOT} BINDIR=%{_bindir} MANDIR=%{_mandir} install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -30,7 +30,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %{_bindir}/%{name}
 %{_bindir}/jwt-agent-core
-
+%{_mandir}/man1/jwt-agent.1*
 
 %changelog
 * Mon Aug 29 2022 Atsushi Kumazaki <kuma@canaly.co.jp> 1.0-1
