@@ -54,7 +54,7 @@ while getopts ":s:l:p:ft:-:" OPT
 do
   if [ "$OPT" = "-" ]; then OPT="-$OPTARG"; fi
   case "-$OPT" in
-  -s) URL="$OPTARG" ;;
+  -s) URL=$URL" ""$OPTARG" ;;
   -l) ACCOUNT="$OPTARG" ;;
   -p) PORT="$OPTARG" ;;
   -f) FOREGROUND=true ;;
@@ -83,6 +83,8 @@ start)
   if [ -z "$URL" -o -z "$ACCOUNT" ]; then
     usage
   fi
+
+  URL=$(echo $URL)
 
   if [ -t 0 ]; then
     echo -n "Passphrase: "

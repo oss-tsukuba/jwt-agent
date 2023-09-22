@@ -27,6 +27,7 @@ var (
   userId     = flag.String("l", "", "User Name")
   uid        string
   dir        string
+  servers     []string
   basename   = "token.jwt"
 )
 
@@ -96,9 +97,19 @@ func init() {
   }
 }
 
-func getToken(userId string, passphrase string, initial bool) (string, error) {
-  endpoint := fmt.Sprintf("%s/jwt", *server)
+func new_servers(ss []string, pos int) []string {
+  sliceSize := len(ss)
 
+  if pos == 0 || sliceSize <= pos {
+    return ss
+  }
+  org1 := ss[0:pos]
+  org2 := ss[pos:sliceSize]
+  return append(org2, org1...)
+}
+
+func getToken(userId string, passphrase string, initial bool) (string, error) {
+  var new_ss []string
   values := url.Values{}
   values.Set("user", userId)
   values.Add("pass", passphrase)
@@ -108,31 +119,41 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
   sec := 1
 
   for {
-    req, err := http.NewRequest(
-      "POST",
-      endpoint,
-      strings.NewReader(values.Encode()),
-    )
-    if err != nil {
-      return "", err
+    all_err := true
+
+    for i:= 0; i < len(servers); i++ {
+      endpoint := fmt.Sprintf("%s/jwt", servers[i])
+      req, err := http.NewRequest(
+        "POST",
+        endpoint,
+        strings.NewReader(values.Encode()),
+      )
+      if err != nil {
+        return "", err
+      }
+
+      req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+      log.Printf("HTTP Request(%s)\n", servers[i]);
+
+      resp, err = client.Do(req)
+
+      if err != nil {
+        log.Println(err)
+        return "", err
+      } else {
+        log.Printf("status:%d\n", resp.StatusCode)
+        defer resp.Body.Close()
+      }
+
+      if err == nil && resp.StatusCode == 200 {
+        new_ss = new_servers(servers, i)
+	all_err = false
+        break
+      }
     }
 
-    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-    log.Printf("HTTP Request\n");
-
-    resp, err = client.Do(req)
-
-    if err != nil {
-      log.Println(err)
-      return "", err      
-    } else {
-      log.Printf("status:%d\n", resp.StatusCode)
-      defer resp.Body.Close()
-    }
-
-    if (err != nil || resp.StatusCode != 200) {
-
+    if all_err {
       if initial {
         return "", fmt.Errorf("%s, %d, %s", *server, resp.StatusCode, http.StatusText(resp.StatusCode))
       } else {
@@ -148,6 +169,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
         continue
       }
     }
+    servers = new_ss
     break
   }
   
@@ -225,6 +247,7 @@ func main() {
   fmt.Scan(&passphrase)
 
   initial := true
+  servers = strings.Split(*server, " ")
 
   for {
     token, err := getToken(*userId, passphrase, initial)
