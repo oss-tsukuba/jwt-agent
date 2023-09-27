@@ -177,6 +177,10 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
       return "", err
   }
 
+  if initial {
+    fmt.Printf("Output JWT to %s\n", dir + "/" + basename)
+  }
+
   return token, nil
 }
 
