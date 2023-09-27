@@ -114,7 +114,10 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
   values.Set("user", userId)
   values.Add("pass", passphrase)
 
-  client := http.DefaultClient
+  client := &http.Client{
+    Timeout: 10 * time.Second,
+  }
+
   var resp *http.Response
   sec := 1
 
