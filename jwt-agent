@@ -84,6 +84,7 @@ start)
     usage
   fi
 
+# remove the first space
   URL=$(echo $URL)
 
   if [ -t 0 ]; then
