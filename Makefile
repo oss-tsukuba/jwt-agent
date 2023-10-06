@@ -25,7 +25,7 @@ install:
 	$(INSTALL_DOC) $(MAN) $(DESTDIR)$(MANDIR)/man1
 
 clean:
-	$(RM) -f $(PROGRAM) go.sum $(MAN)
+	$(RM) -f $(PROGRAM) go.sum
 
 jwt-agent.1: jwt-agent.1.md
 	pandoc -s -t man $< -o $@
