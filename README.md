@@ -17,8 +17,8 @@ When the -s option is not specified, `JWT_SERVER_URL` environment
 variable is used.  When the -l option is not specified, `LOGNAME`
 environment variable is used.
 
-The jwt-agent asks a passphrase at the start up.  The passphrase would
-be provided by a JWT server.  The jwt-agent also accepts the
+The jwt-agent asks a passphrase at the start up to obtain a JWT, which
+is provided by a JWT server.  The jwt-agent also accepts the
 passphrase by the standard input.  The jwt-agent does not stop unless
 it is explicitly stopped, or some error happens.
 
