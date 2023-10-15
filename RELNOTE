@@ -1,0 +1,8 @@
+Release note for JWT agent 1.0.0
+================================
+
+[2023.10.15]
+
+jwt-agent obtains a JSON Web Token (JWT) from a JWT server, and keep
+refreshing it not to expire.  It is running in the background unless
+the -f option is specified.

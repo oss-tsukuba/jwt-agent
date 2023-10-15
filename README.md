@@ -10,6 +10,7 @@ the -f option is specified.
 Usage: jwt-agent [-s URL] [-l user] [-f] [-t timeout]
        jwt-agent --status
        jwt-agent --stop [-t timeout]
+       jwt-agent --version
 ```
 
 When the -s option is not specified, `JWT_SERVER_URL` environment
@@ -29,7 +30,11 @@ jwt-agent --status checks the running status of the jwt-agent.
 
 jwt-agent --stop stops the jwt-agent execution.
 
+jwt-agent --version displays the version number.
+
 ## How to build and install
+
+jwt-agent-core is written in Go.  Go 1.18 or later is required.
 
     % make
     % sudo make PREFIX=/usr/local install

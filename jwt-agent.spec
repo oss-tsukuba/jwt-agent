@@ -1,5 +1,5 @@
 Name: jwt-agent
-Version: 1.0
+Version: 1.0.0
 Release: 1%{?dist}
 Summary: Agent Program for jwt-server
 License: BSD
@@ -33,5 +33,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/jwt-agent.1*
 
 %changelog
-* Mon Aug 29 2022 Atsushi Kumazaki <kuma@canaly.co.jp> 1.0-1
+* Mon Aug 29 2022 Atsushi Kumazaki <kuma@canaly.co.jp> 1.0.0-1
 - Initial build.
