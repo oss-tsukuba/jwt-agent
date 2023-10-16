@@ -1,5 +1,6 @@
 #!/bin/sh
 
+VERSION=1.0.0
 CURL=curl
 PORT=443
 FOREGROUND=false
@@ -14,6 +15,7 @@ usage()
   echo >&2 "Usage: $CMDNAME [-s URL] [-l USER] [-f] [-t TIMEOUT]"
   echo >&2 "       $CMDNAME --status"
   echo >&2 "       $CMDNAME --stop [-t TIMEOUT]"
+  echo >&2 "       $CMDNAME --version"
   exit 2
 }
 
@@ -61,6 +63,9 @@ do
   -t) TIMEOUT="$OPTARG" ;;
   --status) MODE=status ;;
   --stop) MODE=stop ;;
+  --version)
+    echo "${CMDNAME} version ${VERSION}"
+    exit 0 ;;
   '-?')
     echo >&2 "${CMDNAME}: unknown option -$OPTARG"
     usage;;

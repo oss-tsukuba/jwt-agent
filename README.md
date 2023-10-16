@@ -10,14 +10,15 @@ the -f option is specified.
 Usage: jwt-agent [-s URL] [-l user] [-f] [-t timeout]
        jwt-agent --status
        jwt-agent --stop [-t timeout]
+       jwt-agent --version
 ```
 
 When the -s option is not specified, `JWT_SERVER_URL` environment
 variable is used.  When the -l option is not specified, `LOGNAME`
 environment variable is used.
 
-The jwt-agent asks a passphrase at the start up.  The passphrase would
-be provided by a JWT server.  The jwt-agent also accepts the
+The jwt-agent asks a passphrase at the start up to obtain a JWT, which
+is provided by a JWT server.  The jwt-agent also accepts the
 passphrase by the standard input.  The jwt-agent does not stop unless
 it is explicitly stopped, or some error happens.
 
@@ -29,7 +30,11 @@ jwt-agent --status checks the running status of the jwt-agent.
 
 jwt-agent --stop stops the jwt-agent execution.
 
+jwt-agent --version displays the version number.
+
 ## How to build and install
+
+jwt-agent-core is written in Go.  Go 1.18 or later is required.
 
     % make
     % sudo make PREFIX=/usr/local install

@@ -9,10 +9,18 @@ jwt-agent - Obtain and keep refreshing a JSON Web Token
 .PP
 \f[B]jwt-agent\f[R] [-s \f[I]URL\f[R]] [-l \f[I]user\f[R]] [-f] [-t
 \f[I]timeout\f[R]]
-.PP
+.PD 0
+.P
+.PD
 \f[B]jwt-agent\f[R] \[en]status
-.PP
+.PD 0
+.P
+.PD
 \f[B]jwt-agent\f[R] \[en]stop [-t \f[I]timeout\f[R]]
+.PD 0
+.P
+.PD
+\f[B]jwt-agent\f[R] \[en]version
 .SH DESCRIPTION
 .PP
 \f[B]jwt-agent\f[R] obtains a JSON Web Token (JWT) from a JWT
@@ -24,15 +32,14 @@ is used.
 When the -l option is not specified, LOGNAME environment variable is
 used.
 .PP
-The jwt-agent asks a passphrase at the start up.
-The passphrase can be obtained by a JWT server.
-The passphrase can be provided by the standard input.
-The jwt-server does not stop unless it is explicitly stopped, or some
+The jwt-agent asks a passphrase at the start up to obtain a JWT, which
+is provided by a JWT server.
+The jwt-agent also accepts the passphrase by the standard input.
+The jwt-agent does not stop unless it is explicitly shut down, or some
 error happens.
 .PP
-By default, the jwt-server stores a JWT at
-/tmp/jwt_user_u$UID/token.jwt, which can be changed by JWT_USER_PATH
-environment variable.
+By default, the jwt-agent stores a JWT at /tmp/jwt_user_u$UID/token.jwt,
+which can be changed by JWT_USER_PATH environment variable.
 .SH OPTIONS
 .TP
 -s \f[I]URL\f[R]
@@ -53,6 +60,9 @@ checks the running status of the jwt-agent
 .TP
 \[en]stop
 stops the jwt-agent execution
+.TP
+\[en]version
+displays the version number
 .SH ENVIRONMENT
 .TP
 JWT_USER_PATH

@@ -8,11 +8,10 @@ jwt-agent - Obtain and keep refreshing a JSON Web Token
 
 # SYNOPSIS
 
-**jwt-agent** [-s _URL_] [-l _user_] [-f] [-t _timeout_]
-
-**jwt-agent** --status
-
-**jwt-agent** --stop [-t _timeout_]
+**jwt-agent** [-s _URL_] [-l _user_] [-f] [-t _timeout_]  
+**jwt-agent** --status  
+**jwt-agent** --stop [-t _timeout_]  
+**jwt-agent** --version
 
 # DESCRIPTION
 
@@ -23,10 +22,10 @@ the -f option is specified.  When the -s option is not specified,
 JWT_SERVER_URL environment variable is used.  When the -l option is
 not specified, LOGNAME environment variable is used.
 
-The jwt-agent asks a passphrase at the start up.  The passphrase would
-be provided by a JWT server.  The jwt-agent also accepts the
+The jwt-agent asks a passphrase at the start up to obtain a JWT, which
+is provided by a JWT server.  The jwt-agent also accepts the
 passphrase by the standard input.  The jwt-agent does not stop unless
-it is explicitly stopped, or some error happens.
+it is explicitly shut down, or some error happens.
 
 By default, the jwt-agent stores a JWT at
 /tmp/jwt_user_u$UID/token.jwt, which can be changed by JWT_USER_PATH
@@ -51,6 +50,9 @@ environment variable.
 
 --stop
 : stops the jwt-agent execution
+
+--version
+: displays the version number
 
 # ENVIRONMENT
 
