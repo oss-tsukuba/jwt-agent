@@ -31,6 +31,11 @@ By default, the jwt-agent stores a JWT at
 /tmp/jwt_user_u$UID/token.jwt, which can be changed by JWT_USER_PATH
 environment variable.
 
+When multiple -s options are specified, the jwt-agent atemmpts to
+retrieve the JWT in order if the server is not working.
+If th passphrase is incorrect, the program terminates at that point.
+Also, the jwt-agent exits if all URLs are not working.
+
 # OPTIONS
 
 -s _URL_
