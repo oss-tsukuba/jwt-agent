@@ -40,6 +40,8 @@ else
   DOWNLOAD_DIR=$(dirname "$DOWNLOAD_PATH")
 fi
 PIDFILE="$DOWNLOAD_DIR/jwt-agent.pid"
+OUTFILE="$DOWNLOAD_DIR/jwt-agent.out"
+ERRFILE="$DOWNLOAD_DIR/jwt-agent.err"
 
 umask 077
 mkdir -p "$DOWNLOAD_DIR"
@@ -103,7 +105,7 @@ start)
 
   if $FOREGROUND; then
     echo "$PASS" | $CURRENT/jwt-agent-core -s "$URL" -l "$ACCOUNT"
-  else
+  else # background
 
     # create a marker file ($OLD_JWT) to see whether jwt-agent started or not
     if [ -f "$DOWNLOAD_PATH" ]; then
@@ -123,8 +125,36 @@ start)
       need_sleep=false
     fi
 
-    echo "$PASS" | $CURRENT/jwt-agent-core -s "$URL" -l "$ACCOUNT" &
-    pid=$!
+    # if both stdout and stderr are not TTY, redirect them to files
+    # to make "ssh <HOST> jwt-agent ..." finish immediately
+    exit_status=1
+    if [ -t 1 -o -t 2 ]; then
+      if [ ! -t 1 ]; then
+        exec 1>&2
+      elif [ ! -t 2 ]; then
+        exec 2>&1
+      fi
+
+      interactive=true
+
+      echo "$PASS" | $CURRENT/jwt-agent-core -s "$URL" -l "$ACCOUNT" &
+      pid=$!
+    else
+      interactive=false
+
+      out_pid=0
+      err_pid=0
+      trap 'rm -f "${OUTFILE}.new" "${ERRFILE}.new";
+        kill $out_pid $err_pid; exit $exit_status' 0 1 2 15
+
+      echo "$PASS" | $CURRENT/jwt-agent-core -s "$URL" -l "$ACCOUNT" \
+        >"${OUTFILE}.new" 2>"${ERRFILE}.new" &
+      pid=$!
+      tail -f "${OUTFILE}.new" &
+      out_pid=$!
+      tail -f "${ERRFILE}.new" &
+      err_pid=$!
+    fi
 
     if $need_sleep && kill -0 $pid 2>/dev/null; then
       sleep 1
@@ -139,16 +169,29 @@ start)
     while ! is_jwt_agent_ready "$OLD_JWT"; do
       i=$((i + 1))
       if [ $i -gt "$TIMEOUT" ]; then
-	echo >&2 "$CMDNAME (pid $pid): too long time to acquire JWT, timed out"
-	exit 2
+        echo >&2 "$CMDNAME (pid $pid): too long time to acquire JWT, timed out"
+        exit_status=2
+        exit $exit_status
       fi
       if ! kill -0 $pid 2>/dev/null; then
-	echo >&2 "$CMDNAME (pid $pid) aborted"
-	exit 1
+        echo >&2 "$CMDNAME (pid $pid) aborted"
+        exit_status=1
+        exit $exit_status
       fi
       sleep 1
     done
-  fi
+
+    exit_status=0
+    if ! $interactive; then
+      echo "Output stdout to ${OUTFILE}"
+      echo "Output stderr to ${ERRFILE}"
+      mv -f "${OUTFILE}" "${OUTFILE}.bak" 2>/dev/null
+      mv -f "${ERRFILE}" "${ERRFILE}.bak" 2>/dev/null
+      mv -f "${OUTFILE}.new" "${OUTFILE}"
+      mv -f "${ERRFILE}.new" "${ERRFILE}"
+    fi
+
+  fi # background
   ;;
 
 stop)
