@@ -14,7 +14,6 @@ MAN=jwt-agent.1
 all: $(PROGRAM) $(MAN)
 
 $(PROGRAM): $(PROGRAM).go
-	go mod download golang.org/x/crypto
 	go build $(PROGRAM).go
 
 install:
