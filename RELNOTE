@@ -1,3 +1,11 @@
+Release note for JWT agent 1.0.1
+================================
+
+[2024.1.11]
+
+Updated feature
+* when syslog is disabled, not exit but abandon error messages
+
 Release note for JWT agent 1.0.0
 ================================
 
