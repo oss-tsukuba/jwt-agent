@@ -5,6 +5,7 @@ import (
   "flag"
   "fmt"
   "io"
+  "io/ioutil"
   "log"
   "log/syslog"
   "net/http"
@@ -57,10 +58,12 @@ func init() {
   lockFile := dir + "/" + *lock;
   
   logger, err := syslog.New(syslog.LOG_INFO, "jwt-agent")
-  if err != nil {
-    panic(err)
+  if err == nil {
+    log.SetOutput(logger)
+  } else {
+    fmt.Fprintln(os.Stderr, "syslog disabled, error messages will be abandoned")
+    log.SetOutput(ioutil.Discard)
   }
-  log.SetOutput(logger)
 
   fp, err := os.Open(lockFile)
   if err == nil {
