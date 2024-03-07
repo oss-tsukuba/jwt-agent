@@ -7,7 +7,7 @@
 jwt-agent - Obtain and keep refreshing a JSON Web Token
 .SH SYNOPSIS
 .PP
-\f[B]jwt-agent\f[R] [-s \f[I]URL\f[R]] [-l \f[I]user\f[R]] [-f] [-t
+\f[B]jwt-agent\f[R] [-s \f[I]URL\f[R]]\&... [-l \f[I]user\f[R]] [-f] [-t
 \f[I]timeout\f[R]]
 .PD 0
 .P
@@ -40,6 +40,11 @@ error happens.
 .PP
 By default, the jwt-agent stores a JWT at /tmp/jwt_user_u$UID/token.jwt,
 which can be changed by JWT_USER_PATH environment variable.
+.PP
+When multiple -s options are specified, the jwt-agent atemmpts to
+retrieve the JWT in order if the server is not working.
+If th passphrase is incorrect, the program terminates at that point.
+Also, the jwt-agent exits if all URLs are not working.
 .SH OPTIONS
 .TP
 -s \f[I]URL\f[R]

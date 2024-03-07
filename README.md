@@ -7,7 +7,7 @@ the -f option is specified.
 
 ## Usage
 ```
-Usage: jwt-agent [-s URL] [-l user] [-f] [-t timeout]
+Usage: jwt-agent [-s URL]... [-l user] [-f] [-t timeout]
        jwt-agent --status
        jwt-agent --stop [-t timeout]
        jwt-agent --version
@@ -25,6 +25,11 @@ it is explicitly stopped, or some error happens.
 By default, the jwt-agent stores a JWT at
 `/tmp/jwt_user_u$UID/token.jwt`, which can be changed by
 `JWT_USER_PATH` environment variable.
+
+When multiple -s options are specified, the jwt-agent atemmpts to
+retrieve the JWT in order if the server is not working.
+If th passphrase is incorrect, the program terminates at that point.
+Also, the jwt-agent exits if all URLs are not working.
 
 jwt-agent --status checks the running status of the jwt-agent.
 
