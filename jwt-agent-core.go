@@ -19,7 +19,7 @@ import (
   "path/filepath"
 
   b64 "encoding/base64"
-  
+
 )
 
 var (
@@ -57,7 +57,7 @@ func init() {
   }
 
   lockFile := dir + "/" + *lock;
-  
+
   logger, err := syslog.New(syslog.LOG_INFO, "jwt-agent")
   if err == nil {
     log.SetOutput(logger)
@@ -88,7 +88,7 @@ func init() {
 
   file, err := os.OpenFile(lockFile, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0600)
   if err != nil {
-    log.Fatalln(err)  
+    log.Fatalln(err)
     panic(err)
   }
   defer file.Close()
@@ -178,7 +178,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
     servers = new_ss
     break
   }
-  
+
   body, _ := io.ReadAll(resp.Body)
   token := string(body)
 
@@ -230,14 +230,14 @@ func parseToken(tokenString string) (int64, error) {
   decode, _ := b64.URLEncoding.DecodeString(uEnc)
 
   var decode_data interface{}
-  
+
   if err = json.Unmarshal(decode, &decode_data); err != nil {
    return 0, err
   }
 
   data := decode_data.(map[string]interface{})
   exp := data["exp"].(float64)
-  
+
   now := time.Now().Unix()
 
   limit := (exp - float64(now)) * 0.8
@@ -263,7 +263,7 @@ func main() {
     token, err := getToken(*userId, passphrase, initial)
     if err != nil {
       fmt.Fprintln(os.Stderr, *userId + ": " + err.Error())
-      log.Fatalln(*userId + ": " + err.Error())      
+      log.Fatalln(*userId + ": " + err.Error())
       panic(err)
     }
 
@@ -276,6 +276,6 @@ func main() {
     }
 
     initial = false
-    time.Sleep(time.Duration(limit) * time.Second)  
+    time.Sleep(time.Duration(limit) * time.Second)
   }
 }

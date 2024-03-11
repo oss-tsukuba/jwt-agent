@@ -8,9 +8,9 @@ jwt-agent - Obtain and keep refreshing a JSON Web Token
 
 # SYNOPSIS
 
-**jwt-agent** [-s _URL_]... [-l _user_] [-f] [-t _timeout_]  
-**jwt-agent** --status  
-**jwt-agent** --stop [-t _timeout_]  
+**jwt-agent** [-s _URL_]... [-l _user_] [-f] [-t _timeout_]
+**jwt-agent** --status
+**jwt-agent** --stop [-t _timeout_]
 **jwt-agent** --version
 
 # DESCRIPTION
