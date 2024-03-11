@@ -7,7 +7,7 @@ the -f option is specified.
 
 ## Usage
 ```
-Usage: jwt-agent [-s URL]... [-l user] [-f] [-t timeout]
+Usage: jwt-agent [-s URL] ... [-l user] [-f] [-t timeout]
        jwt-agent --status
        jwt-agent --stop [-t timeout]
        jwt-agent --version
