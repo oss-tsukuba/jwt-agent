@@ -140,15 +140,12 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
 
       req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-      log.Printf("HTTP Request(%s)\n", servers[i]);
-
       resp, err = client.Do(req)
 
       if err != nil {
         log.Println(err)
         return "", err
       } else {
-        log.Printf("status:%d\n", resp.StatusCode)
         defer resp.Body.Close()
       }
 
@@ -197,8 +194,6 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
   if err != nil {
       return "", err
   }
-
-  log.Println("get token...")
 
   err = os.Rename(dir + "/" + tmpname, dir + "/" + basename)
   if err != nil {
