@@ -1,5 +1,5 @@
 Name: jwt-agent
-Version: 1.0.1
+Version: 1.1.0
 Release: 1%{?dist}
 Summary: Agent Program for jwt-server
 License: BSD
