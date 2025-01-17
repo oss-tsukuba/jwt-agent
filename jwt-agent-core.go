@@ -128,7 +128,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
     all_err := true
 
     for i:= 0; i < len(servers); i++ {
-      serverPath := strings.TrimSuffix(servers[i], "/")
+      serverPath := strings.TrimRight(servers[i], "/")
       endpoint := fmt.Sprintf("%s/jwt", serverPath)
       req, err := http.NewRequest(
         "POST",
