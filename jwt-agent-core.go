@@ -145,14 +145,13 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
 
       if err != nil {
         log.Println(err)
-        return "", err
-      } else {
-        defer resp.Body.Close()
+	continue;
       }
+      defer resp.Body.Close()
 
       if err == nil && resp.StatusCode == 200 {
         new_ss = new_servers(servers, i)
-	all_err = false
+        all_err = false
         break
       }
     }
