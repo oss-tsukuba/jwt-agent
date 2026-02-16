@@ -27,4 +27,4 @@ clean:
 	$(RM) -f $(PROGRAM) go.sum
 
 jwt-agent.1: jwt-agent.1.md
-	pandoc -s -t man $< -o $@
+	-pandoc -s -t man $< -o $@
