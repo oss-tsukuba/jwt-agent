@@ -95,7 +95,7 @@ start)
   URL=$(echo $URL)
 
   if [ -t 0 ]; then
-    echo -n "Passphrase: "
+    printf "Passphrase: "
     trap "stty echo" HUP INT QUIT TERM
     stty -echo
     read PASS
