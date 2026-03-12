@@ -145,7 +145,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
 
       if err != nil {
         log.Println(err)
-	continue;
+		continue;
       }
       defer resp.Body.Close()
 
@@ -158,7 +158,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
 
     if all_err {
       if initial {
-        return "", fmt.Errorf("%s, %d, %s", *server, resp.StatusCode, http.StatusText(resp.StatusCode))
+        return "", fmt.Errorf("%s, error", *server)
       } else {
         log.Printf("retry after %d seconds\n", sec)
 
