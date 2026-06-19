@@ -113,6 +113,8 @@ func new_servers(ss []string, pos int) []string {
 
 func getToken(userId string, passphrase string, initial bool) (string, error) {
   var new_ss []string
+  var lastErr error
+
   values := url.Values{}
   values.Set("user", userId)
   values.Add("pass", passphrase)
@@ -144,6 +146,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
       resp, err = client.Do(req)
 
       if err != nil {
+        lastErr = err
         log.Println(err)
 		continue;
       }
@@ -158,7 +161,7 @@ func getToken(userId string, passphrase string, initial bool) (string, error) {
 
     if all_err {
       if initial {
-        return "", fmt.Errorf("%s, error", *server)
+        return "", fmt.Errorf("%s, error: %w", *server, lastErr)
       } else {
         log.Printf("retry after %d seconds\n", sec)
 
